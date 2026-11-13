@@ -1,0 +1,238 @@
+[paths]
+data_dir = 'data'
+output_dir = 'outputs'
+channel_output_dir = 'outputs/channel/channel_brt'
+
+[brt]
+"n_estimators" = 5000
+"learning_rate" = 0.01
+"max_depth" = 4
+"subsample" = 0.75
+"min_samples_leaf" = 5
+"min_samples_split" = 10
+"random_state" = 42
+
+[channel_brt]
+"n_estimators" = 1500
+"learning_rate" = 0.01
+"max_depth" = 3
+"min_samples_leaf" = 10
+"min_samples_split" = 20
+"subsample" = 0.75
+"random_state" = 42
+
+[ablation_brt]
+"n_estimators" = 1200
+"learning_rate" = 0.005
+"max_depth" = 3
+"min_samples_leaf" = 1
+"min_samples_split" = 14
+"subsample" = 0.55
+"max_features" = 0.6
+"loss" = "squared_error"
+"random_state" = 42
+
+[dataset.csv]
+"encoding" = "utf-8-sig"
+
+[ablation]
+real_csv = 'data/ablation_real_wells.csv'
+virtual_csv = 'data/training_samples.csv'
+channel_grid_csv = 'data/grid_channels.csv'
+out_dir = 'outputs/experiments'
+target_col = 'sand_thickness'
+source_well_col = 'source_well'
+sample_type_col = 'sample_type'
+min_positive_weight = 1e-12
+n_splits = 5
+n_repeats = 5
+random_state = 42
+k_neighbor = 8
+feature_cols = ['sum_of_energy_mean', 'average_energy_mean', 'minimum_amplitude_mean', 'rms_mean', 'standard_deviation_of_amplitude_mean']
+sigma_space = 2000.0
+
+[channel]
+grid_shape = [280, 359]
+morph_cut = 'auto'
+train_csv = 'data/training_samples.csv'
+valid_csv = 'data/validation_wells.csv'
+predict_csv = 'data/prediction_grid.csv'
+channel_grid_csv = 'data/grid_channels.csv'
+grid_attr_csv = 'data/grid_attributes.csv'
+grid_attr_map = {"total_energy" = 'sum_of_energy_mean', "average_energy" = 'average_energy_mean', "minimum_amplitude" = 'minimum_amplitude_mean', "rms_amplitude" = 'rms_mean', "std_amplitude" = 'standard_deviation_of_amplitude_mean'}
+out_dir = 'outputs/channel/channel_brt'
+target_col = 'sand_thickness_cn'
+attr_cols = ['total_energy', 'average_energy', 'minimum_amplitude', 'rms_amplitude', 'std_amplitude']
+feature_cols = ['total_energy', 'average_energy', 'minimum_amplitude', 'rms_amplitude', 'std_amplitude', 'distance_to_channel']
+key_cols = ['grid_row', 'grid_col']
+x_col = 'X_center'
+y_col = 'Y_center'
+test_size = 0.3
+random_state = 42
+channel_bandwidth = [[1, 1000.0], [2, 500.0], [3, 500.0]]
+bandwidth_search_space = [[1, [1000.0, 1500.0, 2000.0, 2500.0, 3000.0]], [2, [500.0, 1000.0, 1500.0, 2000.0]], [3, [500.0, 1000.0, 1500.0]]]
+channel_target_quantile = [[1, 0.75], [2, 0.6], [3, 0.5]]
+min_target_samples = 5
+channel_level_strength = [[1, 1.0], [2, 0.75], [3, 0.5]]
+decay_mode = 'exp'
+max_soft_blend = 0.45
+enable_bandwidth_search = false
+enable_morph_finish = true
+morph_cut_quantile = 0.5
+morph_floor_blend = 0.6
+morph_band_max_d = 1000.0
+morph_bridge_rounds = 2
+morph_band_edges = [-1.0, 1e-09, 250.0, 500.0, 1000.0, inf]
+morph_band_names = ['inside channel d=0', '0~250 m', '250~500 m', '500~1000 m', '>1000 m']
+morph_col_final = 'pred_sand_thickness_final'
+morph_col_delta = 'delta_morph_minus_c2'
+morph_col_delta_total = 'delta_final_minus_raw'
+cell_km2 = 0.25
+
+[evaluate]
+placebo_seed = 42
+n_bootstrap = 5000
+random_seed = 0
+confidence_percentiles = [2.5, 97.5]
+out_dir = 'outputs/channel'
+key = ['grid_row', 'grid_col']
+y_col = 'sand_thickness_cn'
+col_raw = 'pred_sand_thickness_raw'
+col_fin = 'pred_sand_thickness_channel_constrained'
+col_delta = 'delta_channel_minus_raw'
+n_placebo = 200
+datasets = [['train', '02_training_predictions.csv'], ['test', '03_test_predictions.csv'], ['external_validation', '04_validation_predictions.csv']]
+zone_name = [[0, 'zone0 Outside channel'], [1, 'zone1 Influence zone'], [2, 'zone2 Core zone']]
+
+[features]
+input_csv = 'data/feature_wells.csv'
+out_dir = 'outputs/features'
+attr_cols = ['arc_length', 'average_energy', 'average_instantaneous_frequency', 'average_instantaneous_phase', 'average_negative_amplitude', 'half_energy', 'maximum_amplitude', 'mean_amplitude', 'minimum_amplitude', 'rms_amplitude', 'std_amplitude', 'amplitude_sum', 'total_energy', 'negative_amplitude_sum', 'threshold_value']
+
+[plot_map]
+train_csv = 'data/training_samples.csv'
+valid_csv = 'data/validation_wells.csv'
+out_dir = 'outputs/visualization'
+pred_basename = '05_grid_predictions.csv'
+col_raw = 'pred_sand_thickness_raw'
+col_c2 = 'pred_sand_thickness_channel_constrained'
+col_fin = 'pred_sand_thickness_final'
+col_delta = 'delta_final_minus_raw'
+
+[plot_validation]
+out_dir = 'outputs/visualization'
+train_name = '02_training_predictions.csv'
+test_name = '03_test_predictions.csv'
+valid_name = '04_validation_predictions.csv'
+pred_kind = 'constrained'
+pred_cols = {"raw" = ['pred_sand_thickness_raw', 'raw'], "constrained" = ['pred_sand_thickness_channel_constrained', 'constrained'], "final" = ['pred_sand_thickness_final', 'morphology adjusted']}
+out_stem = '01_validation_scatter_constrained'
+observed_col = 'sand_thickness_cn'
+show_r = false
+show_r2 = true
+show_rmse = true
+show_mae = true
+show_legend = true
+show_panel_labels = false
+panel_labels = ['(a)', '(b)']
+r2_def = 'sse'
+shared_axis = true
+dpi = 1200
+tick_step = 2.0
+marker_size = 32
+alpha = 0.7
+c_train = '#4C78A8'
+c_test = '#E07B39'
+c_valid = '#59A14F'
+c_line = '#333333'
+line_style = '--'
+line_width = 1.2
+label_fontsize = 10.5
+
+[sample_statistics]
+out_dir = 'outputs/sampling'
+local_train_csv = 'outputs/sampling/02_channel_training_samples.csv'
+target_col_candidates = ['sand_thickness', 'sand_thickness_cn', 'cumulative_sand_thickness']
+
+[sampling]
+real_csv = 'data/real_wells.csv'
+grid_attr_csv = 'data/grid_attributes.csv'
+grid_channel_csv = 'data/grid_channels.csv'
+out_dir = 'outputs/sampling'
+target_col = 'sand_thickness'
+cell_size = 500.0
+k_neighbor_wells = 8
+sigma_space = 2000.0
+sigma_geo = 0.35
+keep_ratio = [[1, 0.6], [2, 0.4]]
+base_weight = [[1, 0.25], [2, 0.12]]
+min_sample_weight = 0.02
+max_sample_weight = 0.25
+feature_cols = ['arclength_mean', 'average_energy_mean', 'average_instantaneous_frequency_mean', 'average_instantaneous_phase_mean', 'average_negative_amplitude_mean', 'half_energy_mean', 'maximum_amplitude_mean', 'mean_amplitude_mean', 'minimum_amplitude_mean', 'rms_mean', 'standard_deviation_of_amplitude_mean', 'sum_of_amplitude_mean', 'sum_of_energy_mean', 'sum_of_negative_amplitude_mean', 'threshold_value_mean']
+channel_cols = ['distance_to_channel', 'channel_weight_2000', 'in_channel_3000', 'channel_zone']
+
+[structure]
+grid_shape = [280, 359]
+pred_csv = 'outputs/channel/channel_brt/05_grid_predictions.csv'
+label_csv = 'data/real_wells.csv'
+out_dir = 'outputs/channel'
+cell = 500.0
+km2_per_cell = 0.25
+cutoff_quantiles = [0.25, 0.5, 0.75]
+fig_dpi = 300
+zone_name = [[0, 'zone0 Outside channel'], [1, 'zone1 Channel influence'], [2, 'zone2 Channel core']]
+
+[train]
+train_csv = 'data/training_samples.csv'
+valid_csv = 'data/validation_wells.csv'
+out_dir = 'outputs/model'
+target_col = 'sand_thickness_cn'
+feature_cols = ['total_energy', 'average_energy', 'minimum_amplitude', 'rms_amplitude', 'std_amplitude']
+sample_weight_col = 'sample_weight'
+
+[uncertainty]
+out = 'outputs/uncertainty'
+src = 'data/uncertainty_grid.csv'
+metrics = ['kfold_log_prediction_sd', 'smoothed_uncertainty_score']
+nbin = 60
+label = {"kfold_log_prediction_sd" = 'Kfold_log_sd', "smoothed_uncertainty_score" = 'smoothed_score'}
+
+[gis]
+database = 'F:\小论文\整理\论文4章最小任务代码\完整代码\data\gis\research.gpkg'
+channel_layer = '砂体面_河道连续_强连接'
+boundary_layer = 'study_area'
+
+[reproduce]
+source_csv = 'data/integrated_raw.csv'
+out_dir = 'outputs/reproduction_check'
+tolerance = 0.10
+validation_rows = [3, 21, 25, 27, 28, 33, 34, 35, 36, 37]
+
+[petrel]
+source_dir = 'data/petrel_attributes'
+output_csv = 'data/seismic_grid.csv'
+work_dir = 'outputs/petrel_work'
+chunk_size = 100000
+
+[petrel.attributes]
+"7arclength" = "arc_length"
+"7average energy" = "average_energy"
+"7average instantaneous frequency" = "average_instantaneous_frequency"
+"7average instantaneous phase" = "average_instantaneous_phase"
+"7average negative amplitude" = "average_negative_amplitude"
+"7half energy" = "half_energy"
+"7maximum amplitude" = "maximum_amplitude"
+"7mean amplitude" = "mean_amplitude"
+"7minimum amplitude" = "minimum_amplitude"
+"7RMS" = "rms_amplitude"
+"7standard deviation of amplitude" = "std_amplitude"
+"7sum of amplitude" = "amplitude_sum"
+"7sum of energy" = "total_energy"
+"7sum of negative amplitude" = "negative_amplitude_sum"
+"7threshold value" = "threshold_value"
+
+[spatial]
+crs = 'EPSG:4545'
+units = 'metre'
+x_column = 'X'
+y_column = 'Y'

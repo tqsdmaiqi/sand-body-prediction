@@ -1,0 +1,9 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 数据（不纳入版本库）
+data/
+
+# 运行产物
+outputs/

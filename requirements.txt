@@ -1,0 +1,13 @@
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+seaborn
+openpyxl
+PyYAML
+scikit-image
+# ArcPy requires a compatible ArcGIS Python environment.
+geopandas
+shapely
+tqdm
